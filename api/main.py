@@ -4,6 +4,8 @@ from pydantic import BaseModel
 from search import search, get_answer
 from fastapi.middleware.cors import CORSMiddleware
 
+from fastapi.responses import JSONResponse
+
 
 class QueryRequest(BaseModel):
     query: str
@@ -40,4 +42,4 @@ async def get_paragraphs(req: QueryRequest):
 async def answer(req: AnswerRequest):
     result = get_answer(req.query, req.paragraphs)
 
-    return result
+    return {"answer": result}

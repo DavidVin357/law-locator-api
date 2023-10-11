@@ -13,13 +13,17 @@ load_dotenv()
 # Traffic Act
 # Road Transport Act
 # Food act
-ids = [
-    "520092023002",
-    "503052023002",
-    "516022016004",
-    "530062023008",
-    "506102023009",
-]
+
+#  ids = [
+#             "520092023002",
+#             "503052023002",
+#             "516022016004",
+#             "530062023008",
+#             "506102023009",
+#         ]
+
+with open("law-ids.txt", "r") as file:
+    ids = [id.strip() for id in file]
 
 
 xml_url = "https://www.riigiteataja.ee/en/tolge/xml/"
@@ -39,8 +43,14 @@ def get_laws():
     return laws
 
 
-def get_paragraphs(law: str):
+def get_law_structure(law: str):
     lawNode = parseString(law)
+
+    law_title = (
+        lawNode.getElementsByTagName("nimi")[0]
+        .getElementsByTagName("pealkiri")[0]
+        .firstChild.nodeValue
+    )
 
     tokenizer = tiktoken.encoding_for_model(emb_model_name)
     paragraphs = []
@@ -53,4 +63,4 @@ def get_paragraphs(law: str):
         if paragraph_text.strip() and len(tokenizer.encode(paragraph_text)) <= 8192:
             paragraphs.append(paragraph_text)
             ids.append(paragraph_id)
-    return paragraphs, ids
+    return law_title, paragraphs, ids

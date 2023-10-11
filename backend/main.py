@@ -3,7 +3,7 @@ import os
 import pinecone
 
 from dotenv import load_dotenv
-from laws import get_paragraphs
+from laws import get_law_structure, get_laws
 
 
 load_dotenv()
@@ -24,7 +24,7 @@ def process_laws(laws: list[tuple]):
     index = pinecone.Index("openai")
 
     for law_id, law_text in laws:
-        paragraphs, paragraph_ids = get_paragraphs(law_text)
+        law_title, paragraphs, paragraph_ids = get_law_structure(law_text)
 
         response = openai.Embedding.create(input=paragraphs, model=emb_model_name)
 
@@ -32,7 +32,7 @@ def process_laws(laws: list[tuple]):
             (
                 f"{law_id}|{paragraph_ids[i]}",
                 record["embedding"],
-                {"text": paragraphs[i]},
+                {"text": paragraphs[i], "title": law_title},
             )
             for i, record in enumerate(response["data"])
         ]
@@ -42,10 +42,11 @@ def process_laws(laws: list[tuple]):
         for i in range(0, len(embeds), 100):
             index.upsert(embeds[i : i + 100])
 
-        print("upsert done!")
+        print("upsert done!: ", law_id)
 
     print(total_embeds)
+    print("avg act tokens length: ", total_embeds / len(laws))
 
 
-# laws = get_laws()
-# process_laws(laws)
+laws = get_laws()
+process_laws(laws)

@@ -13,6 +13,8 @@ pinecone.init(
     environment=os.getenv("PINECONE_ENV"),  # find next to API key in console
 )
 
+import json
+
 
 def search(query):
     index = pinecone.Index("openai")
@@ -46,11 +48,13 @@ def search(query):
         article_id = m["id"].split("|")[0]
         paragraph_id = m["id"].split("|")[1]
         paragraph = m["metadata"]["text"]
+        paragraph_title = m["metadata"]["title"]
 
         matches.append(
             {
                 "article_id": article_id,
                 "paragraph_id": paragraph_id,
+                "paragraph_title": paragraph_title,
                 "paragraph": paragraph,
             }
         )
